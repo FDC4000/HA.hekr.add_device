@@ -37,11 +37,20 @@ hekr_provision/
 
 See `hekr_provision/README.md` for the detailed flow, byte formats and sequence diagram.
 
+## Install
+
+```bash
+pip install -e .            # installs the `hekr-provision` console command
+hekr-provision --help
+```
+
+Pure standard library, no third-party dependencies (Python ≥ 3.8). Without installing,
+run from the repo root with `PYTHONPATH=.` and `python3 -m hekr_provision.cli …`.
+
 ## Usage
 
 ```bash
 export PYTHONPATH=.
-
 # ── end-to-end (login -> pinCode -> provision) in one go ──
 python3 -m hekr_provision.cli provision \
     --username <acct> --password <pw> \

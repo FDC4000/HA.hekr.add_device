@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hekr-provision"
+version = "1.0.0"
+description = "Reverse-engineered Hekr/Wisen device-provisioning toolkit (login, pinCode, SmartConfig/AirKiss, SoftAP)"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{ name = "FDC4000" }]
+keywords = ["hekr", "wisen", "iot", "smartconfig", "airkiss", "softap", "provisioning", "reverse-engineering"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Home Automation",
+  "Intended Audience :: Developers",
+]
+dependencies = []          # standard library only
+
+[project.scripts]
+hekr-provision = "hekr_provision.cli:main"
+
+[tool.setuptools]
+packages = ["hekr_provision"]
+
+[tool.setuptools.package-data]
+hekr_provision = ["README.md"]
