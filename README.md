@@ -31,6 +31,7 @@ hekr_provision/
 ├── get_pincode.py  GET getPINCode?ssid=                (HekrUserAction.getPinCode)
 ├── airkiss.py      SmartConfig length-encoder          (HekrAirKissEncoder)
 ├── softap.py       SoftAP exchange @192.168.4.1:7001   (CommonDeviceConfig)
+├── provision.py    end-to-end chain (login→pin→config)
 └── cli.py          unified command-line entry point
 ```
 
@@ -41,6 +42,12 @@ See `hekr_provision/README.md` for the detailed flow, byte formats and sequence 
 ```bash
 export PYTHONPATH=.
 
+# ── end-to-end (login -> pinCode -> provision) in one go ──
+python3 -m hekr_provision.cli provision \
+    --username <acct> --password <pw> \
+    --ssid MyWiFi --wifi-password <wifi_pw> --method softap
+
+# ── or step by step ──
 # 1) log in  ->  access_token
 python3 -m hekr_provision.cli login --username <acct> --password <pw>
 
@@ -54,8 +61,11 @@ python3 -m hekr_provision.cli smartconfig --ssid MyWiFi --password <wifi_pw> --p
 python3 -m hekr_provision.cli softap --ssid MyWiFi --password <wifi_pw> --pin <pinCode>
 ```
 
-Every module also has a no-network self-test: `python3 hekr_provision/<module>.py --selftest`
-(airkiss prints a structure summary instead).
+`provision` accepts `--token`/`--pin` to skip the login/pinCode steps, `--method smartconfig`
+(with `--send` to broadcast), and `--region {asia,america,europe,test}`.
+
+Every module also has a no-network self-test: `python3 -m hekr_provision.<module> --selftest`
+(airkiss prints a structure summary; provision runs the whole chain against local mocks).
 
 ## Security notes
 

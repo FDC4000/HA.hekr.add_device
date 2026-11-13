@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import airkiss, get_pincode, login, softap
+from . import airkiss, get_pincode, login, provision, softap
 
 
 def _cmd_smartconfig(a: argparse.Namespace) -> int:
@@ -44,6 +44,25 @@ def _cmd_softap(a: argparse.Namespace) -> int:
     return 1
 
 
+def _cmd_provision(a: argparse.Namespace) -> int:
+    try:
+        res = provision.run(
+            a.username, a.password, a.ssid, a.wifi_password,
+            pid=a.pid, region=a.region, method=a.method,
+            access_token=a.token, pin=a.pin,
+            softap_host=a.host, softap_port=a.port,
+            transport="http" if a.http else "tcp", attempts=a.attempts,
+            broadcast=a.send, repeat=a.repeat, sc_port=a.port,
+            on_step=lambda m: print("·", m),
+        )
+    except (provision.login.LoginError, provision.get_pincode.PinCodeError, ValueError) as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    ok = res.get("provisioned", res.get("broadcast", True))
+    print("\nRESULT:", {k: v for k, v in res.items() if k != "access_token"})
+    return 0 if ok else 1
+
+
 def _cmd_login(a: argparse.Namespace) -> int:
     base = a.base_url or login.REGION_BASE[a.region]
     try:
@@ -71,6 +90,24 @@ def _cmd_pincode(a: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="hekr_provision", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
+
+    pr = sub.add_parser("provision", help="end-to-end: login -> pinCode -> softap/smartconfig")
+    pr.add_argument("--username", help="Hekr account (phone/email); omit if --token given")
+    pr.add_argument("--password", help="Hekr account password; omit if --token given")
+    pr.add_argument("--ssid", required=True, help="target Wi-Fi SSID the device should join")
+    pr.add_argument("--wifi-password", default="", help="target Wi-Fi password")
+    pr.add_argument("--method", choices=("softap", "smartconfig"), default="softap")
+    pr.add_argument("--token", help="reuse an access_token (skip login)")
+    pr.add_argument("--pin", help="reuse a pinCode (skip getPINCode)")
+    pr.add_argument("--pid", default=login.DEFAULT_PID)
+    pr.add_argument("--region", choices=sorted(login.REGION_BASE), default="asia")
+    pr.add_argument("--host", default=softap.DEFAULT_HOST, help="softap device host")
+    pr.add_argument("--port", type=int, default=softap.DEFAULT_PORT)
+    pr.add_argument("--http", action="store_true", help="softap: use HTTP POST instead of TCP")
+    pr.add_argument("--attempts", type=int, default=60)
+    pr.add_argument("--send", action="store_true", help="smartconfig: actually UDP-broadcast")
+    pr.add_argument("--repeat", type=int, default=1)
+    pr.set_defaults(func=_cmd_provision)
 
     lg = sub.add_parser("login", help="authenticate to Hekr UAA; print access_token")
     lg.add_argument("--username", help="phone/email/account")

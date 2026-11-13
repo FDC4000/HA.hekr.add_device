@@ -5,8 +5,9 @@ Modules:
   get_pincode — fetch the provisioning pinCode from the Hekr cloud
   airkiss     — SmartConfig/AirKiss length-encoder (HekrAirKissEncoder port)
   softap      — SoftAP exchange with the device at 192.168.4.1:7001
+  provision   — end-to-end chain: login -> pinCode -> softap/smartconfig
 """
-from . import airkiss, get_pincode, login, softap
+from . import airkiss, get_pincode, login, provision, softap
 
-__all__ = ["airkiss", "get_pincode", "login", "softap"]
+__all__ = ["airkiss", "get_pincode", "login", "provision", "softap"]
 __version__ = "1.0.0"
