@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import airkiss, get_pincode, softap
+from . import airkiss, get_pincode, login, softap
 
 
 def _cmd_smartconfig(a: argparse.Namespace) -> int:
@@ -44,6 +44,20 @@ def _cmd_softap(a: argparse.Namespace) -> int:
     return 1
 
 
+def _cmd_login(a: argparse.Namespace) -> int:
+    base = a.base_url or login.REGION_BASE[a.region]
+    try:
+        if a.refresh:
+            resp = login.refresh_token(a.refresh, base_url=base)
+        else:
+            resp = login.login(a.username, a.password, pid=a.pid, base_url=base)
+    except login.LoginError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return 1
+    print(resp["access_token"])
+    return 0
+
+
 def _cmd_pincode(a: argparse.Namespace) -> int:
     try:
         pin = get_pincode.get_pin_code(a.token, a.ssid, base_url=a.base_url)
@@ -57,6 +71,15 @@ def _cmd_pincode(a: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="hekr_provision", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="cmd", required=True)
+
+    lg = sub.add_parser("login", help="authenticate to Hekr UAA; print access_token")
+    lg.add_argument("--username", help="phone/email/account")
+    lg.add_argument("--password", help="password")
+    lg.add_argument("--pid", default=login.DEFAULT_PID, help="product id / pit")
+    lg.add_argument("--region", choices=sorted(login.REGION_BASE), default="asia")
+    lg.add_argument("--base-url", help="override BASE_UAA_URL (wins over --region)")
+    lg.add_argument("--refresh", help="refresh an existing refresh_token instead of logging in")
+    lg.set_defaults(func=_cmd_login)
 
     sc = sub.add_parser("smartconfig", help="build/broadcast AirKiss packet lengths")
     sc.add_argument("--ssid", required=True)
