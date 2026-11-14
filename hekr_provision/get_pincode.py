@@ -49,6 +49,7 @@ def get_pin_code(access_token: str, ssid: str,
             body = resp.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
         detail = e.read().decode("utf-8", "replace")
+        e.close()
         if e.code == 401:
             raise PinCodeError(
                 "401 Unauthorized — access_token expired/invalid; "

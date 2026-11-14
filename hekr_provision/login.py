@@ -53,6 +53,7 @@ def _post_json(url: str, payload: dict, timeout: float) -> dict:
             body = resp.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
         detail = e.read().decode("utf-8", "replace")
+        e.close()
         raise LoginError(f"HTTP {e.code}: {detail}") from e
     except urllib.error.URLError as e:
         raise LoginError(f"network error: {e.reason}") from e

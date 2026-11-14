@@ -47,6 +47,19 @@ hekr-provision --help
 Pure standard library, no third-party dependencies (Python ≥ 3.8). Without installing,
 run from the repo root with `PYTHONPATH=.` and `python3 -m hekr_provision.cli …`.
 
+## Tests
+
+35 tests, standard-library `unittest`, fully offline (local mock HTTP servers and a
+mock device AP — no hardware or network):
+
+```bash
+PYTHONPATH=. python3 -m unittest discover -s tests -t .
+```
+
+Coverage: AirKiss CRC-8 + structure/round-trip, SoftAP payload & `devConfig` parsing,
+pinCode fetch (success / 401 / bad length / non-JSON), login + token refresh + JWT uid,
+the end-to-end `provision` chain, and CLI dispatch.
+
 ## Usage
 
 ```bash
