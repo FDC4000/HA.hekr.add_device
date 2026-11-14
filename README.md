@@ -9,6 +9,20 @@ app onboards a new device onto the user's local Wi-Fi and binds it to the accoun
 > permitted to provision. Credentials in the SoftAP/SmartConfig channels are
 > transmitted in cleartext (see Security notes).
 
+## Purpose
+
+The Wisen / Hekr-Hummingbird mobile app is **no longer maintained**, so onboarding a
+new device through the official app has become unreliable. This toolkit reproduces the
+app's provisioning flow in pure Python so you can still add devices to the platform —
+log in, fetch a provisioning pinCode, and hand the Wi-Fi credentials to the device over
+SmartConfig or SoftAP — without depending on the app.
+
+**Limitation — an existing account is required.** The toolkit only *authenticates* an
+existing Hekr/Wisen account (`POST {UAA}/login`); it implements no sign-up or account-
+registration path (verified: the only cloud calls are `login`, `token/refresh`,
+`getPINCode` and `getNewDeviceList`). You must therefore already have account credentials
+(username / password) — e.g. from when the app still worked — and know your region.
+
 ## The chain
 
 ```
@@ -46,19 +60,6 @@ hekr-provision --help
 
 Pure standard library, no third-party dependencies (Python ≥ 3.8). Without installing,
 run from the repo root with `PYTHONPATH=.` and `python3 -m hekr_provision.cli …`.
-
-## Tests
-
-35 tests, standard-library `unittest`, fully offline (local mock HTTP servers and a
-mock device AP — no hardware or network):
-
-```bash
-PYTHONPATH=. python3 -m unittest discover -s tests -t .
-```
-
-Coverage: AirKiss CRC-8 + structure/round-trip, SoftAP payload & `devConfig` parsing,
-pinCode fetch (success / 401 / bad length / non-JSON), login + token refresh + JWT uid,
-the end-to-end `provision` chain, and CLI dispatch.
 
 ## Usage
 
@@ -165,6 +166,19 @@ the **target Wi-Fi** the device should join; `<pinCode>` = the 6-char provisioni
 | `--port` | `7001` | device AP port |
 | `--http` | off | HTTP POST instead of raw TCP |
 | `--attempts` | `60` | `devConfig` read attempts |
+
+## Tests
+
+35 tests, standard-library `unittest`, fully offline (local mock HTTP servers and a
+mock device AP — no hardware or network):
+
+```bash
+PYTHONPATH=. python3 -m unittest discover -s tests -t .
+```
+
+Coverage: AirKiss CRC-8 + structure/round-trip, SoftAP payload & `devConfig` parsing,
+pinCode fetch (success / 401 / bad length / non-JSON), login + token refresh + JWT uid,
+the end-to-end `provision` chain, and CLI dispatch.
 
 ## Security notes
 
