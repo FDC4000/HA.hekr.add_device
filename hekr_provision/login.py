@@ -7,7 +7,7 @@ Faithful reproduction of me.hekr.sdk.HekrUser.login() / refreshToken()
 
     POST {BASE_UAA_URL}login
         Content-Type: application/json , Accept: application/json
-        {"username","password","pit":<pid>,"clientType":"ANDROID","appLoginInfo":{...}}
+        {"username","password","pid":<pid>,"clientType":"ANDROID","appLoginInfo":{...}}
     -> {"access_token": <JWT>, "refresh_token": ..., ...}
 
     POST {BASE_UAA_URL}token/refresh
@@ -15,7 +15,7 @@ Faithful reproduction of me.hekr.sdk.HekrUser.login() / refreshToken()
     -> {"access_token", "refresh_token", ...}
 
 The access_token is a JWT; its base64 payload carries "uid" (see refreshUserInfo).
-`pit` is the product id (HekrSDK.getPid()), read in the app from res/raw/config.json
+`pid` is the product id (HekrSDK.getPid()), read in the app from res/raw/config.json
 Hekr.AppId — the bundled Wisen value is the placeholder "00000000000".
 
 Research / authorised testing only.
@@ -93,7 +93,7 @@ def login(username: str, password: str, pid: str = DEFAULT_PID,
     payload = {
         "username": username,
         "password": password,
-        "pit": pid,
+        "pid": pid,
         "clientType": "ANDROID",
         "appLoginInfo": app_login_info or _default_app_login_info(),
     }
@@ -124,7 +124,7 @@ def _main(argv=None) -> int:
     p.add_argument("--username", help="phone/email/account")
     p.add_argument("--password", default=os.environ.get("HEKR_PASSWORD"),
                    help="password (or set HEKR_PASSWORD)")
-    p.add_argument("--pid", default=DEFAULT_PID, help="product id / pit")
+    p.add_argument("--pid", default=DEFAULT_PID, help="product id")
     p.add_argument("--region", choices=sorted(REGION_BASE), default="asia")
     p.add_argument("--base-url", help="override BASE_UAA_URL (wins over --region)")
     p.add_argument("--refresh", help="refresh an existing refresh_token instead of logging in")
@@ -168,7 +168,7 @@ def _selftest() -> int:
         def do_POST(self):  # noqa: N802
             n = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(n) or b"{}")
-            ok = self.path.endswith("/login") and body.get("username") and body.get("pit")
+            ok = self.path.endswith("/login") and body.get("username") and body.get("pid")
             ok = ok or (self.path.endswith("/token/refresh") and body.get("refresh_token"))
             self.send_response(200 if ok else 400)
             self.send_header("Content-Type", "application/json")

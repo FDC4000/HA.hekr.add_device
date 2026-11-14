@@ -106,13 +106,14 @@ def build_parser() -> argparse.ArgumentParser:
     pr.add_argument("--http", action="store_true", help="softap: use HTTP POST instead of TCP")
     pr.add_argument("--attempts", type=int, default=60)
     pr.add_argument("--send", action="store_true", help="smartconfig: actually UDP-broadcast")
-    pr.add_argument("--repeat", type=int, default=1)
+    pr.add_argument("--repeat", type=int, default=3,
+                    help="smartconfig: broadcast passes (~21s each; 3 ≈ 1 min)")
     pr.set_defaults(func=_cmd_provision)
 
     lg = sub.add_parser("login", help="authenticate to Hekr UAA; print access_token")
     lg.add_argument("--username", help="phone/email/account")
     lg.add_argument("--password", help="password")
-    lg.add_argument("--pid", default=login.DEFAULT_PID, help="product id / pit")
+    lg.add_argument("--pid", default=login.DEFAULT_PID, help="product id")
     lg.add_argument("--region", choices=sorted(login.REGION_BASE), default="asia")
     lg.add_argument("--base-url", help="override BASE_UAA_URL (wins over --region)")
     lg.add_argument("--refresh", help="refresh an existing refresh_token instead of logging in")
@@ -124,7 +125,8 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("--pin", required=True)
     sc.add_argument("--send", action="store_true", help="actually UDP-broadcast the lengths")
     sc.add_argument("--port", type=int, default=7001)
-    sc.add_argument("--repeat", type=int, default=1)
+    sc.add_argument("--repeat", type=int, default=3,
+                    help="broadcast passes (~21s each; 3 ≈ 1 min)")
     sc.set_defaults(func=_cmd_smartconfig)
 
     sa = sub.add_parser("softap", help="exchange with device at 192.168.4.1:7001")
