@@ -65,37 +65,6 @@ and accepts the first `devConfig` reply where **`PIN` matches** the sent pinCode
 
 ---
 
-## Usage
+For installation, CLI usage, the full parameter reference and security notes,
+see the [project README](../README.md).
 
-```bash
-# from this directory's PARENT:
-
-# 1) Inspect / broadcast SmartConfig packet lengths
-python3 -m hekr_provision.cli smartconfig --ssid MyWiFi --password secret123 --pin A1B2C3
-python3 -m hekr_provision.cli smartconfig --ssid MyWiFi --password secret123 --pin A1B2C3 --send
-
-# 2) Fetch a provisioning pinCode (needs a logged-in user access_token)
-python3 -m hekr_provision.cli pincode --token <bearer> --ssid MyWiFi
-
-# 3) Run the SoftAP exchange (phone must be on the device AP first)
-python3 -m hekr_provision.cli softap --ssid MyWiFi --password secret123 --pin <pinCode>
-```
-
-Each module also runs standalone for a self-test:
-
-```bash
-python3 hekr_provision/airkiss.py    # prints encoded-length summary + CRC8 check
-python3 hekr_provision/softap.py     # loopback test against a built-in mock device
-```
-
----
-
-## Security notes (observed in the app)
-
-- 🔸 **Cleartext credentials.** SoftAP sends the Wi-Fi password in plain `ssid=…&password=…`
-  over HTTP/TCP. SmartConfig only *length-obfuscates* it — passively recoverable over the air.
-- 🔸 **Multicast leak.** AirKiss frames go to `224.127.*.255`, so any device in pairing
-  mode within range can reconstruct the credentials.
-- 🔸 **pinCode is the only binding secret.** Worth confirming server-side that the pinCode
-  is tied to the requesting token.
-- 🔸 CRC-8 provides integrity only, no confidentiality.
